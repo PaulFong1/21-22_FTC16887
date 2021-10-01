@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+// Testing 1234556
 // Created for 16887.
 @TeleOp(name="Main TeleOp", group="TeleOp")
 //@Disabled
@@ -22,26 +23,20 @@ public class MainTeleOp extends BaseRobot {
             else if (gamepad1.dpad_right) auto_mecanum(0.75, 0.5);
 //            reset_drive_encoders();
         }
-        // lift motor
-        if (gamepad1.left_trigger > 0.0)        set_lift1_target_pos(ConstantVariables.K_LIFT_UP);   // UP
-        else if (gamepad1.right_trigger > 0.0)  set_lift1_target_pos(ConstantVariables.K_LIFT_DOWN);    // DOWN (initial position)
-//        else
-//            lift1.setPower(0);
+        // Turn the top spinning wheel: left for clockwise and right for anticlockwise
 
-        if (gamepad1.left_bumper)       spin1.setPower(1);
-        else if (gamepad1.right_bumper) spin1.setPower(-1);
-        else                            spin1.setPower(0);
-// spin2 is opposite to spin1
-        if (gamepad1.left_bumper)       spin2.setPower(-1);
-        else if (gamepad1.right_bumper) spin2.setPower(1);
-        else                            spin2.setPower(0);
+        if (gamepad1.left_bumper)       topSpin.setPower(1);
+        else if (gamepad1.right_bumper) topSpin.setPower(-1);
+        else                            topSpin.setPower(0);
+        //turn the motor for the linear slide
+        if (gamepad1.left_trigger>0)       linearSlide.setPower(1);
+        else if (gamepad1.right_trigger>0) linearSlide.setPower(-1);
+        else                            linearSlide.setPower(0);
+
 
         if (gamepad1.left_stick_button) DEBUG = !DEBUG; // Toggle the debug flag
         super.loop();
 
-//if (gamepad1.left_bumper)     lift1.setPower(-1.0);
-//  else if (gamepad1.right_bumper) lift1.setPower(1.0);
-//  else                            lift1.setPower(0.0);
         // open servo
     /*    if (gamepad1.a)
             open_servos(); //find double through trial and error; set in constant variables
