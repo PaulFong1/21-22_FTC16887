@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -8,13 +9,14 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import static com.qualcomm.robotcore.hardware.DistanceSensor.distanceOutOfRange;
-
 //created by Paul Fong for 16887
 public class BaseRobot extends OpMode {
-    public DcMotor leftBack, rightBack, leftFront, rightFront, lift1, spin1, spin2; //lift2; 1 is right, 2 is left
- //   public Servo left_servo, right_servo;
-    public ColorSensor front_sensor;
-    public DistanceSensor distance_sensor;
+    public DcMotor leftBack, rightBack, leftFront, rightFront, topSpin, linearSlide;   // The four wheels
+// public Servo top_spin;                                       // The top spinning wheel
+//    public DcMotor leftBack, rightBack, leftFront, rightFront, lift1, spin1, spin2; //lift2; 1 is right, 2 is left
+//   public Servo left_servo, right_servo;
+//    public ColorSensor front_sensor;
+//    public DistanceSensor distance_sensor;
     public ElapsedTime timer = new ElapsedTime();
     public boolean DEBUG=false;                     // Debug flag
 //    public Boolean autonmous = false;
@@ -25,20 +27,24 @@ public class BaseRobot extends OpMode {
         leftBack   = hardwareMap.get(DcMotor.class, "leftBack");
         rightFront = hardwareMap.get(DcMotor.class, "rightFront");
         rightBack  = hardwareMap.get(DcMotor.class, "rightBack");
-        lift1      = hardwareMap.get(DcMotor.class, "lift1");
-        spin1      = hardwareMap.get(DcMotor.class, "spin1");
-        spin2      = hardwareMap.get(DcMotor.class, "spin2");
-        front_sensor = hardwareMap.get(ColorSensor.class, "front_sensor");
-        distance_sensor = hardwareMap.get(DistanceSensor.class, "front_sensor");
-        front_sensor.enableLed(false);               // turn off the sensor LED to save power
+        topSpin   = hardwareMap.get(DcMotor.class, "topSpin");
+        linearSlide   = hardwareMap.get(DcMotor.class, "linearSide");
+//        lift1      = hardwareMap.get(DcMotor.class, "lift1");
+//        spin1      = hardwareMap.get(DcMotor.class, "spin1");
+//        spin2      = hardwareMap.get(DcMotor.class, "spin2");
+//        front_sensor = hardwareMap.get(ColorSensor.class, "front_sensor");
+//        distance_sensor = hardwareMap.get(DistanceSensor.class, "front_sensor");
+//        front_sensor.enableLed(false);               // turn off the sensor LED to save power
 
         // ZeroPowerBehavior of the motors
         telemetry.addData("INI Front ZeroP behavior:", "Left=%s, Right=%s", leftFront.getZeroPowerBehavior(), rightFront.getZeroPowerBehavior());
         telemetry.addData("INI Back ZeroP behavior: ", "Left=%s, Right=%s", leftBack.getZeroPowerBehavior(), rightBack.getZeroPowerBehavior());
-        telemetry.addData("INI SPIN ZeroP behavior: ", "spin1=%s, spin2=%s", spin1.getZeroPowerBehavior(), spin2.getZeroPowerBehavior());
-        telemetry.addData("INI LIFT1 position", lift1.getCurrentPosition());
-        telemetry.addData("INI Sen: ", "%d/ %d/ %d/ %d/ %d", front_sensor.alpha(), front_sensor.red(), front_sensor.green(), front_sensor.blue(), front_sensor.argb());
-        telemetry.addData("INI Distance (cm)", distance_sensor.getDistance(DistanceUnit.CM));
+        telemetry.addData("INI topSpin: ", "ZeroP=%s, POS=%d", topSpin.getZeroPowerBehavior(), topSpin.getCurrentPosition());
+        telemetry.addData("INI linearSlide: ", "ZeroP=%s, POS=%d", linearSlide.getZeroPowerBehavior(), linearSlide.getCurrentPosition());
+//        telemetry.addData("INI SPIN ZeroP behavior: ", "spin1=%s, spin2=%s", spin1.getZeroPowerBehavior(), spin2.getZeroPowerBehavior());
+//       telemetry.addData("INI LIFT1 position", lift1.getCurrentPosition());
+//        telemetry.addData("INI Sen: ", "%d/ %d/ %d/ %d/ %d", front_sensor.alpha(), front_sensor.red(), front_sensor.green(), front_sensor.blue(), front_sensor.argb());
+//        telemetry.addData("INI Distance (cm)", distance_sensor.getDistance(DistanceUnit.CM));
        // telemetry.addData("INI Servo dir: ", "LEFT=%s, RIGHT=%s", left_servo.getDirection(), right_servo.getDirection());
         //telemetry.addData("INI Servo pos: ", "LEFT=%.2f, RIGHT=%.2f", left_servo.getPosition(), right_servo.getPosition());
 
@@ -48,60 +54,60 @@ public class BaseRobot extends OpMode {
         rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
 //        lift1.setDirection(DcMotorSimple.Direction.REVERSE);        // Because of the way the motor is mounted, this will avoid using negative numbers
-        lift1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+//        lift1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
         //spin1.setDirection(DcMotorSimple.Direction.REVERSE);        // Because of the way the motor is mounted, this will avoid using negative numbers
-        spin1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+//        spin1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         //spin2.setDirection(DcMotorSimple.Direction.REVERSE);        // Because of the way the motor is mounted, this will avoid using negative numbers
-        spin2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+//        spin2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         // Positive is UP and negative in down.  It resets to zero at start().
     }
     @Override
     public void start() {
         timer.reset();
         reset_drive_encoders();         // reset all four motors: set encoders to zero and set modes
-        reset_lift1_encoder();          // reset lift motor: set encoders to zero and set modes
-        reset_spin1_encoder();
-        reset_spin2_encoder();
+//        reset_lift1_encoder();          // reset lift motor: set encoders to zero and set modes
+//        reset_spin1_encoder();
+//        reset_spin2_encoder();
     //    open_lift1();                  // open the left and right servos
-set_lift1_target_pos(ConstantVariables.K_LIFT_UP);
-        front_sensor.enableLed(true);   // turn on the sensor LED
+//set_lift1_target_pos(ConstantVariables.K_LIFT_UP);
+//        front_sensor.enableLed(true);   // turn on the sensor LED
         telemetry.addData("START Front ZeroP behavior:", "Left=%s, Right=%s", leftFront.getZeroPowerBehavior(), rightFront.getZeroPowerBehavior());
         telemetry.addData("START Back ZeroP behavior: ", "Left=%s, Right=%s", leftBack.getZeroPowerBehavior(), rightBack.getZeroPowerBehavior());
-        telemetry.addData("START LIFT1 position", lift1.getCurrentPosition());
-        telemetry.addData("START Sen: ", "%d/ %d/ %d/ %d/ %d", front_sensor.alpha(), front_sensor.red(), front_sensor.green(), front_sensor.blue(), front_sensor.argb());
-        telemetry.addData("START Distance (cm)", distance_sensor.getDistance(DistanceUnit.CM));
+//        telemetry.addData("START LIFT1 position", lift1.getCurrentPosition());
+//        telemetry.addData("START Sen: ", "%d/ %d/ %d/ %d/ %d", front_sensor.alpha(), front_sensor.red(), front_sensor.green(), front_sensor.blue(), front_sensor.argb());
+//        telemetry.addData("START Distance (cm)", distance_sensor.getDistance(DistanceUnit.CM));
       //  telemetry.addData("START Servo dir: ", "LEFT=%s, RIGHT=%s", left_servo.getDirection(), right_servo.getDirection());
         //telemetry.addData("START Servo pos: ", "LEFT=%.2f, RIGHT=%.2f", left_servo.getPosition(), right_servo.getPosition());
     }
     @Override
     public void stop() {
-        front_sensor.enableLed(false);   // turn off the sensor LED to save power
+//        front_sensor.enableLed(false);   // turn off the sensor LED to save power
     }
     @Override
     public void loop() {
         if (DEBUG) {
-            String detected_color = "";
-            if (is_black(front_sensor.alpha(), front_sensor.red(), front_sensor.blue())) detected_color = detected_color + " Black ";
-            if (is_yellow(front_sensor.alpha(), front_sensor.red(), front_sensor.green(), front_sensor.blue())) detected_color = detected_color + " Yellow ";
+//            String detected_color = "";
+//            if (is_black(front_sensor.alpha(), front_sensor.red(), front_sensor.blue())) detected_color = detected_color + " Black ";
+//            if (is_yellow(front_sensor.alpha(), front_sensor.red(), front_sensor.green(), front_sensor.blue())) detected_color = detected_color + " Yellow ";
 
 //            telemetry.addData("Timer ", "%.1f", timer.seconds());
-            telemetry.addData("LIFT1 motor current pos: ", "%d, Color = %s", get_lift1_motor_enc(), detected_color);
+//            telemetry.addData("LIFT1 motor current pos: ", "%d, Color = %s", get_lift1_motor_enc(), detected_color);
             telemetry.addData("Front curr pos:", "Left=%d, Right=%d", get_leftFront_motor_enc(), get_rightFront_motor_enc());
             telemetry.addData("Back  curr pos:", "Left=%d, Right=%d", get_leftBack_motor_enc(), get_rightBack_motor_enc());
             telemetry.addData("Front power: ", "Left=%.2f, Right=%.2f", leftFront.getPower(), rightFront.getPower());
             telemetry.addData("Back  power: ", "Left=%.2f, Right=%.2f", leftBack.getPower(), rightBack.getPower());
           //  telemetry.addData("Servo pos: ", "Left=%.2f, Right=%.2f", left_servo.getPosition(), right_servo.getPosition());
-            telemetry.addData("Sen: ", " %d/ %d/ %d/ %d/ %d", front_sensor.alpha(), front_sensor.red(), front_sensor.green(), front_sensor.blue(), front_sensor.argb());
+//            telemetry.addData("Sen: ", " %d/ %d/ %d/ %d/ %d", front_sensor.alpha(), front_sensor.red(), front_sensor.green(), front_sensor.blue(), front_sensor.argb());
 //            telemetry.addData("Red：", front_sensor.red());
 //            telemetry.addData("Green：", front_sensor.green());
 //            telemetry.addData("Blue：", front_sensor.blue());
-            double detected_dist = distance_sensor.getDistance(DistanceUnit.CM);
-            if (detected_dist == distanceOutOfRange) {
-                telemetry.addData("Distance: out of range", distance_sensor.getDistance(DistanceUnit.CM));
-            } else {
-                telemetry.addData("Distance: ", "%.2fcm", distance_sensor.getDistance(DistanceUnit.CM));
-            }
+//            double detected_dist = distance_sensor.getDistance(DistanceUnit.CM);
+//            if (detected_dist == distanceOutOfRange) {
+//                telemetry.addData("Distance: out of range", distance_sensor.getDistance(DistanceUnit.CM));
+//            } else {
+//               telemetry.addData("Distance: ", "%.2fcm", distance_sensor.getDistance(DistanceUnit.CM));
+//            }
         }
     }
     /* @param power:   the speed to turn at. Negative for reverse
@@ -241,20 +247,20 @@ rightBackPower = Range.clip(rightBackPower * ConstantVariables.K_RB_ADJUST, -1.0
     public boolean is_black(int alpha, int red, int blue) { return ((blue > red*(3.0/4.0))); }
     public boolean is_yellow(int alpha, int red, int green, int blue) { return ((red > 2*blue) && (green > 2*blue)); }
 
-    public boolean set_lift1_target_pos(int target_pos) {
-        if (lift1.getCurrentPosition() == target_pos) return true;
-        lift1.setTargetPosition(target_pos);
+//    public boolean set_lift1_target_pos(int target_pos) {
+//        if (lift1.getCurrentPosition() == target_pos) return true;
+//        lift1.setTargetPosition(target_pos);
 //        lift1.setPower(ConstantVariables.K_LIFT_MAX_PWR);
 //        lift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);  // Assume that the motor was reset.  Before setting the mode, the position has to be set correctly.
-        return(Math.abs(lift1.getCurrentPosition() - target_pos) < ConstantVariables.K_LIFT_ERROR);
-    }
+//        return(Math.abs(lift1.getCurrentPosition() - target_pos) < ConstantVariables.K_LIFT_ERROR);
+//    }
     // get lift encoder
-    public int get_lift1_motor_enc() {      // RUN_TO_POSITION is more accurate
+//    public int get_lift1_motor_enc() {      // RUN_TO_POSITION is more accurate
 //        if (lift1.getMode() != DcMotor.RunMode.RUN_TO_POSITION) {
 //            lift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 //        }
-        return lift1.getCurrentPosition();
-    }
+//        return lift1.getCurrentPosition();
+//    }
     public void reset_drive_encoders() {
         // The motor is to set the current encoder position to zero.
         leftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -272,7 +278,7 @@ rightBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 rightFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
-    public void reset_lift1_encoder() {
+/*    public void reset_lift1_encoder() {
         // The motor is to set the current encoder position to zero.
         lift1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         // The motor is to attempt to rotate in whatever direction is necessary to cause
@@ -283,18 +289,19 @@ rightFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 //        lift1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
-    public void reset_spin1_encoder() {
+ */
+//    public void reset_spin1_encoder() {
         // The motor is to set the current encoder position to zero.
-        spin1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        spin1.setPower(ConstantVariables.K_LIFT_MAX_PWR);
-        spin1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    }
-    public void reset_spin2_encoder() {
+//        spin1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        spin1.setPower(ConstantVariables.K_LIFT_MAX_PWR);
+//        spin1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//    }
+//    public void reset_spin2_encoder() {
         // The motor is to set the current encoder position to zero.
-        spin2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        spin2.setPower(ConstantVariables.K_LIFT_MAX_PWR);
-        spin2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    }
+//       spin2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        spin2.setPower(ConstantVariables.K_LIFT_MAX_PWR);
+//        spin2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//    }
     //get leftBack encoder
     public int get_leftBack_motor_enc() {
 //        if (leftBack.getMode() != DcMotor.RunMode.RUN_USING_ENCODER) {
