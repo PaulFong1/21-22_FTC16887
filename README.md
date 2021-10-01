@@ -1,4 +1,4 @@
-Just download it
+Download it to Andriod Studio
 
 
 ## NOTICE
