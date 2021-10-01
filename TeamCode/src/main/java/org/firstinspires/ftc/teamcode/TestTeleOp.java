@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
+//
 // Created for 16887.
 @TeleOp(name="Test TeleOp", group="_Other")
 //@Disabled
@@ -16,7 +16,7 @@ public class TestTeleOp extends BaseRobot {
     }
     @Override
     public void loop() {
-        if (gamepad1.left_bumper) {    // Using the power adjustment factors to balance the motors
+/*        if (gamepad1.left_bumper) {    // Using the power adjustment factors to balance the motors
             if (gamepad1.x) leftBack.setPower(ConstantVariables.K_LB_ADJUST);
             else leftBack.setPower(0);
             if (gamepad1.y) rightBack.setPower(ConstantVariables.K_RB_ADJUST);
@@ -35,19 +35,13 @@ public class TestTeleOp extends BaseRobot {
             if (gamepad1.b) rightFront.setPower(1);
             else rightFront.setPower(0);
         }
-        // lift motor
-        // lift motor
-        if (gamepad1.left_trigger > 0.0)        set_lift1_target_pos(ConstantVariables.K_LIFT_UP);   // UP
-        else if (gamepad1.right_trigger > 0.0)  set_lift1_target_pos(ConstantVariables.K_LIFT_DOWN);    // DOWN (initial position)
-//        else
-//            lift1.setPower(0);
-        if (gamepad1.left_bumper)       spin1.setPower(1);
-        else if (gamepad1.right_bumper) spin1.setPower(-1);
-        else                            spin1.setPower(0);
-// spin2 is opposite to spin1
-        if (gamepad1.left_bumper)       spin2.setPower(-1);
-        else if (gamepad1.right_bumper) spin2.setPower(1);
-        else                            spin2.setPower(0);
+
+ */
+
+        // Turn the top spinning wheel: left for clockwise and right for anticlockwise
+        if (gamepad1.left_bumper)       topSpin.setPower(1);
+        else if (gamepad1.right_bumper) topSpin.setPower(-1);
+        else                            topSpin.setPower(0);
 
         if (gamepad1.left_stick_button) DEBUG = !DEBUG; // Toggle the debug flag
         super.loop();
